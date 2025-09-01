@@ -41,17 +41,16 @@ jobs:
         echo "✓ Test Case 2 Passed"
         # No cleanup needed
 
-    # Test Case 3: --build appimage (clean=yes)
-    - name: Test Case 3 - --build appimage (clean=yes)
+    # Test Case 3: Invalid build type test
+    - name: Test Case 3 - Invalid build type (should fail)
       run: |
-        echo "--- Running Test Case 3: ./build.sh --build appimage --test-flags ---"
-        OUTPUT=$(./build.sh --build appimage --test-flags)
-        echo "$OUTPUT"
-        echo "--- Verifying Test Case 3 ---"
-        echo "$OUTPUT" | grep -q "Build Format: appimage" || (echo "❌ Expected 'Build Format: appimage'" && exit 1)
-        echo "$OUTPUT" | grep -q "Clean Action: yes" || (echo "❌ Expected 'Clean Action: yes'" && exit 1)
-        echo "✓ Test Case 3 Passed"
-        # No cleanup needed
+        echo "--- Running Test Case 3: ./build.sh --build appimage --test-flags (should fail) ---"
+        if ./build.sh --build appimage --test-flags 2>/dev/null; then
+          echo "❌ Expected this to fail but it succeeded"
+          exit 1
+        else
+          echo "✓ Test Case 3 Passed - Correctly rejected invalid build format"
+        fi
 
     # Test Case 4: --clean yes (build=deb)
     - name: Test Case 4 - --clean yes (build=deb)
@@ -101,26 +100,4 @@ jobs:
         echo "✓ Test Case 7 Passed"
         # No cleanup needed
 
-    # Test Case 8: --build appimage --clean yes
-    - name: Test Case 8 - --build appimage --clean yes
-      run: |
-        echo "--- Running Test Case 8: ./build.sh --build appimage --clean yes --test-flags ---"
-        OUTPUT=$(./build.sh --build appimage --clean yes --test-flags)
-        echo "$OUTPUT"
-        echo "--- Verifying Test Case 8 ---"
-        echo "$OUTPUT" | grep -q "Build Format: appimage" || (echo "❌ Expected 'Build Format: appimage'" && exit 1)
-        echo "$OUTPUT" | grep -q "Clean Action: yes" || (echo "❌ Expected 'Clean Action: yes'" && exit 1)
-        echo "✓ Test Case 8 Passed"
-        # No cleanup needed
 
-    # Test Case 9: --build appimage --clean no
-    - name: Test Case 9 - --build appimage --clean no
-      run: |
-        echo "--- Running Test Case 9: ./build.sh --build appimage --clean no --test-flags ---"
-        OUTPUT=$(./build.sh --build appimage --clean no --test-flags)
-        echo "$OUTPUT"
-        echo "--- Verifying Test Case 9 ---"
-        echo "$OUTPUT" | grep -q "Build Format: appimage" || (echo "❌ Expected 'Build Format: appimage'" && exit 1)
-        echo "$OUTPUT" | grep -q "Clean Action: no" || (echo "❌ Expected 'Clean Action: no'" && exit 1)
-        echo "✓ Test Case 9 Passed"
-        # No cleanup needed

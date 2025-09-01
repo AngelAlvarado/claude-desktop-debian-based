@@ -45,8 +45,8 @@ jobs:
             flags: "" # Defaults (deb, clean=yes)
             artifact_suffix: 'deb'
           - arch: amd64
-            flags: "--build appimage --clean no"
-            artifact_suffix: 'appimage'
+            flags: "--clean no"
+            artifact_suffix: 'deb-unclean'
 
     uses: ./.github/workflows/build-amd64.yml # Call the dedicated amd64 workflow
     with:
@@ -69,8 +69,8 @@ jobs:
             flags: "--clean no" # Implies deb build
             artifact_suffix: 'deb'
           - arch: arm64
-            flags: "--build appimage"
-            artifact_suffix: 'appimage'
+            flags: "" # Default deb build
+            artifact_suffix: 'deb-clean'
 
     uses: ./.github/workflows/build-arm64.yml # Call the dedicated arm64 workflow
     with:
@@ -97,10 +97,10 @@ jobs:
           name: package-amd64-deb
           path: artifacts/ # Download all artifacts into a single directory
 
-      - name: Download AMD64 AppImage artifact
+      - name: Download AMD64 deb (unclean) artifact
         uses: actions/download-artifact@v4
         with:
-          name: package-amd64-appimage
+          name: package-amd64-deb-unclean
           path: artifacts/
 
       - name: Download ARM64 deb artifact
@@ -109,15 +109,15 @@ jobs:
           name: package-arm64-deb
           path: artifacts/
 
-      - name: Download ARM64 AppImage artifact
+      - name: Download ARM64 deb (clean) artifact
         uses: actions/download-artifact@v4
         with:
-          name: package-arm64-appimage
+          name: package-arm64-deb-clean
           path: artifacts/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: artifacts/**/* # Upload all downloaded .deb and .AppImage files
+          files: artifacts/**/* # Upload all downloaded .deb files
           # The release name and tag will automatically use the pushed tag (e.g., v1.0.0)
           # GITHUB_TOKEN is automatically used for authentication

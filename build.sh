@@ -1,6 +1,6 @@
 #!/bin/bash
 : "${ARM64_EXPECTED_HASH:=ad9a8bb5bf985245d1f592ef1591e32a8644d329c9aeb347b116d3650a9317a0}"
-: "${AMD64_EXPECTED_HASH:=79891e59e6c47bca913b91a7cfa2b92f83a1ebb17a6203b920183ec411f6d316}"
+: "${AMD64_EXPECTED_HASH:=2eb18754cabb7573023701d043ec37a3e4680dcc52bb0979ac9cb5862ddf8d39}"
 : "${BUILT_IN_DOCKER:=0}"
 
 set -euo pipefail
@@ -14,7 +14,7 @@ cat /etc/os-release && uname -m && dpkg --print-architecture
 
 # Set variables based on detected architecture
 if [ "$HOST_ARCH" = "amd64" ]; then
-    CLAUDE_DOWNLOAD_URL="https://storage.googleapis.com/osprey-downloads-c02f6a0d-347c-492b-a752-3e0651722e97/nest-win-x64/Claude-Setup-x64.exe"
+    CLAUDE_DOWNLOAD_URL="https://storage.googleapis.com/osprey-downloads-c02f6a0d-347c-492b-a752-3e0651722e97/nest-win-x64/Claude-Setup-x64.exe" # Official amd64 URL https://claude.ai/download
     ARCHITECTURE="amd64"
     CLAUDE_EXE_FILENAME="Claude-Setup-x64.exe"
     echo "Configured for amd64 build."
@@ -103,8 +103,8 @@ while [[ $# -gt 0 ]]; do
         shift # past argument
         ;;
         -h|--help)
-        echo "Usage: $0 [--build deb|appimage] [--clean yes|no] [--test-flags]"
-        echo "  --build: Specify the build format (deb or appimage). Default: deb"
+        echo "Usage: $0 [--build deb] [--clean yes|no] [--test-flags]"
+        echo "  --build: Specify the build format (deb only). Default: deb"
         echo "  --clean: Specify whether to clean intermediate build files (yes or no). Default: yes"
         echo "  --test-flags: Parse flags, print results, and exit without building."
         exit 0
@@ -118,8 +118,8 @@ done
 
 # Validate arguments
 BUILD_FORMAT=$(echo "$BUILD_FORMAT" | tr '[:upper:]' '[:lower:]') CLEANUP_ACTION=$(echo "$CLEANUP_ACTION" | tr '[:upper:]' '[:lower:]')
-if [[ "$BUILD_FORMAT" != "deb" && "$BUILD_FORMAT" != "appimage" ]]; then
-    echo "❌ Invalid build format specified: '$BUILD_FORMAT'. Must be 'deb' or 'appimage'." >&2
+if [[ "$BUILD_FORMAT" != "deb" ]]; then
+    echo "❌ Invalid build format specified: '$BUILD_FORMAT'. Must be 'deb'." >&2
     exit 1
 fi
 if [[ "$CLEANUP_ACTION" != "yes" && "$CLEANUP_ACTION" != "no" ]]; then
@@ -161,12 +161,9 @@ echo "Checking dependencies..."
 DEPS_TO_INSTALL=""
 COMMON_DEPS="curl file p7zip wget wrestool icotool convert npx"
 DEB_DEPS="dpkg-deb"
-APPIMAGE_DEPS="" 
 ALL_DEPS_TO_CHECK="$COMMON_DEPS"
 if [ "$BUILD_FORMAT" = "deb" ]; then
     ALL_DEPS_TO_CHECK="$ALL_DEPS_TO_CHECK $DEB_DEPS"
-elif [ "$BUILD_FORMAT" = "appimage" ]; then
-    ALL_DEPS_TO_CHECK="$ALL_DEPS_TO_CHECK $APPIMAGE_DEPS"
 fi
 
 for cmd in $ALL_DEPS_TO_CHECK; do
@@ -452,44 +449,6 @@ if [ "$BUILD_FORMAT" = "deb" ]; then
         FINAL_OUTPUT_PATH="Not Found"
     fi
 
-elif [ "$BUILD_FORMAT" = "appimage" ]; then
-    echo "📦 Calling AppImage packaging script for $ARCHITECTURE..."
-    chmod +x scripts/build-appimage.sh
-    if ! scripts/build-appimage.sh \
-        "$VERSION" "$ARCHITECTURE" "$WORK_DIR" "$APP_STAGING_DIR" "$PACKAGE_NAME"; then
-        echo "❌ AppImage packaging script failed."
-        exit 1
-    fi
-    APPIMAGE_FILE=$(find "$WORK_DIR" -maxdepth 1 -name "${PACKAGE_NAME}-${VERSION}-${ARCHITECTURE}.AppImage" | head -n 1)
-    echo "✓ AppImage Build complete!"
-    if [ -n "$APPIMAGE_FILE" ] && [ -f "$APPIMAGE_FILE" ]; then
-        FINAL_OUTPUT_PATH="./$(basename "$APPIMAGE_FILE")" 
-        mv "$APPIMAGE_FILE" "$FINAL_OUTPUT_PATH"
-        echo "Package created at: $FINAL_OUTPUT_PATH"
-
-        echo -e "\033[1;36m--- Generate .desktop file for AppImage ---\033[0m"
-        FINAL_DESKTOP_FILE_PATH="./${PACKAGE_NAME}-appimage.desktop"
-        echo "📝 Generating .desktop file for AppImage at $FINAL_DESKTOP_FILE_PATH..."
-        cat > "$FINAL_DESKTOP_FILE_PATH" << EOF
-[Desktop Entry]
-Name=Claude (AppImage)
-Comment=Claude Desktop (AppImage Version $VERSION)
-Exec=$(basename "$FINAL_OUTPUT_PATH") %u
-Icon=claude-desktop
-Type=Application
-Terminal=false
-Categories=Office;Utility;Network;
-MimeType=x-scheme-handler/claude;
-StartupWMClass=Claude
-X-AppImage-Version=$VERSION
-X-AppImage-Name=Claude Desktop (AppImage)
-EOF
-        echo "✓ .desktop file generated."
-
-    else
-        echo "Warning: Could not determine final .AppImage file path from $WORK_DIR for ${ARCHITECTURE}."
-        FINAL_OUTPUT_PATH="Not Found"
-    fi
 fi
 
 
@@ -515,23 +474,6 @@ if [ "$BUILD_FORMAT" = "deb" ]; then
         echo -e "   (or \`sudo dpkg -i $FINAL_OUTPUT_PATH\`)"
     else
         echo -e "⚠️ Debian package file not found. Cannot provide installation instructions."
-    fi
-elif [ "$BUILD_FORMAT" = "appimage" ]; then
-    if [ "$FINAL_OUTPUT_PATH" != "Not Found" ] && [ -e "$FINAL_OUTPUT_PATH" ]; then
-        echo -e "✅ AppImage created at: \033[1;36m$FINAL_OUTPUT_PATH\033[0m"
-        echo -e "\n\033[1;33mIMPORTANT:\033[0m This AppImage requires \033[1;36mAppImageLauncher\033[0m for proper desktop integration"
-        echo -e "and to handle the \`claude://\` login process correctly."
-        echo -e "\n🚀 To install AppImageLauncher (v2.2.0 for amd64):"
-        echo -e "   1. Download:"
-        echo -e "      \033[1;32mwget https://github.com/TheAssassin/AppImageLauncher/releases/download/v2.2.0/appimagelauncher_2.2.0-travis995.0f91801.bionic_amd64.deb -O /tmp/appimagelauncher.deb\033[0m"
-        echo -e "       - or appropriate package from here: \033[1;34mhttps://github.com/TheAssassin/AppImageLauncher/releases/latest\033[0m"
-        echo -e "   2. Install the package:"
-        echo -e "      \033[1;32msudo dpkg -i /tmp/appimagelauncher.deb\033[0m"
-        echo -e "   3. Fix any missing dependencies:"
-        echo -e "      \033[1;32msudo apt --fix-broken install\033[0m"
-        echo -e "\n   After installation, simply double-click \033[1;36m$FINAL_OUTPUT_PATH\033[0m and choose 'Integrate and run'."
-    else
-        echo -e "⚠️ AppImage file not found. Cannot provide usage instructions."
     fi
 fi
 echo -e "\033[1;34m======================\033[0m"
