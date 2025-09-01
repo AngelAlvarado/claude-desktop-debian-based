@@ -2,7 +2,7 @@
 
 A security-focused fork that creates **Debian packages (.deb)** for Claude Desktop on Linux systems. This project takes the Windows Claude Desktop installer and adapts it for Debian-based distributions by replacing Windows-specific components with Linux-compatible implementations.
 
-**Originally forked from:** [aaddrick/claude-desktop-debian](https://github.com/aaddrick/claude-desktop-debian)
+**Originally forked from:** [aaddrick/claude-desktop-debian](https://github.com/aaddrick/claude-desktop-debian) and [joshuacox/claude-desktop-appimage](https://github.com/joshuacox/claude-desktop-appimage)
 
 ## Features
 
@@ -14,7 +14,8 @@ A security-focused fork that creates **Debian packages (.deb)** for Claude Deskt
 - ✅ **SHA256 Checksum Verification** for security
 - ✅ **Docker-based Reproducible Builds**
 
-![Claude Desktop running on Linux](https://github.com/user-attachments/assets/93080028-6f71-48bd-8e59-5149d148cd45)
+![Claude Desktop PoPOS Launcher](https://github.com/user-attachments/assets/0b7c9510-adc8-4ea4-8ffe-a444e19dbae8)
+![Claude Desktop running on PoPOS Linux](https://github.com/user-attachments/assets/bf128447-bc8b-45a9-8677-0a79abc0d5c2)
 
 ## Quick Start (Docker - Recommended)
 
