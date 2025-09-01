@@ -15,7 +15,9 @@ A security-focused fork that creates **Debian packages (.deb)** for Claude Deskt
 - ✅ **Docker-based Reproducible Builds**
 
 Claude Desktop PoPOS Launcher
+
 ![Claude Desktop PoPOS Launcher](https://github.com/user-attachments/assets/0b7c9510-adc8-4ea4-8ffe-a444e19dbae8)
+
 Claude Desktop running on PoPOS Linux
 ![Claude Desktop running on PoPOS Linux](https://github.com/user-attachments/assets/bf128447-bc8b-45a9-8677-0a79abc0d5c2)
 
