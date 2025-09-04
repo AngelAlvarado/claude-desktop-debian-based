@@ -4,12 +4,12 @@ on:
   workflow_call:
     inputs:
       build_flags:
-        description: 'Flags to pass to build.sh (e.g., "--build appimage --clean no")'
+        description: 'Flags to pass to build.sh (e.g., "--build deb --clean no")'
         required: false
         type: string
         default: '' # Default is no extra flags
       artifact_suffix:
-        description: 'Suffix for the artifact name (e.g., deb, appimage)'
+        description: 'Suffix for the artifact name (e.g., deb, deb-unclean)'
         required: true
         type: string
 
@@ -23,10 +23,9 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Install FUSE for AppImageTool
+    - name: Update package lists
       run: |
         sudo apt-get update
-        sudo apt-get install -y libfuse2
 
     - name: Make build script executable
       run: chmod +x ./build.sh
@@ -44,5 +43,4 @@ jobs:
         name: package-arm64-${{ inputs.artifact_suffix }} # Unique name using suffix
         path: | # Adjust path based on expected output
           claude-desktop_*.deb
-          claude-desktop-*.AppImage
         if-no-files-found: error # Fail if build didn't produce output

@@ -1,8 +1,8 @@
 #!/bin/bash
-: "${ARM64_EXPECTED_HASH:=ad9a8bb5bf985245d1f592ef1591e32a8644d329c9aeb347b116d3650a9317a0}"
+: "${ARM64_EXPECTED_HASH:=bb7384f57b1c8c98ebd0594436c28a774cf79db37f695ea2a98ee3629374c998}"
 : "${AMD64_EXPECTED_HASH:=2eb18754cabb7573023701d043ec37a3e4680dcc52bb0979ac9cb5862ddf8d39}"
 : "${BUILT_IN_DOCKER:=0}"
-
+#!/bin/bash
 set -euo pipefail
 
 # --- Architecture Detection ---

@@ -27,13 +27,3 @@ jobs:
       run: |
         echo "Running build with flags: ${{ inputs.build_flags }}"
         sudo ./build.sh ${{ inputs.build_flags }} # Use sudo for apt install within build.sh
-
-    # Optional: Add steps here to upload the built artifact if needed
-    # - name: Upload Artifact
-    #   uses: actions/upload-artifact@v4
-    #   with:
-    #     name: package-${{ inputs.target_arch }}-${{ github.run_id }} # Example name
-    #     path: | # Adjust path based on expected output
-    #       claude-desktop_*.deb
-    #       # Only .deb packages now
-    #     if-no-files-found: error # Fail if build didn't produce output

@@ -1,9 +1,8 @@
-name: claude-desktop-appimage
+name: claude-desktop-debian
 
 on: [push]
 
 env:
-  APPIMAGE_EXTRACT_AND_RUN: 1
   BUILT_IN_DOCKER: 1
 
 jobs:
@@ -13,87 +12,53 @@ jobs:
       - name: Checkout repository
         id: checkoutrepo
         uses: actions/checkout@v4
-      - name: mkdir output
-        run: mkdir output
-      - name: builder
-        id: builder
-        uses: joshuacox/claude-desktop-appimage@v0.11.3
-        with: 
-          build-arg: 'appimage'
-      - name: debbuilder
+      
+      - name: Create output directory
+        run: mkdir -p output
+
+      - name: Build Debian package
         id: debbuilder
-        uses: joshuacox/claude-desktop-appimage@v0.11.3
-        with: 
-          build-arg: 'deb'
-      - name: Get the build time
-        run: echo "The time to build was ${{ steps.builder.outputs.time }}"
-      - name: upload appimage amd64
-        id: apparchiveramd64
-        uses: actions/upload-artifact@v4
-        with:
-          name: claude-desktop-appimage-amd64
-          path: output/claude-desktop-0.11.3-amd64.AppImage
-      - name: upload deb amd64
+        run: |
+          ./docker-builder.sh --build deb --clean yes
+
+      - name: List output files
+        run: ls -la output/
+
+      - name: Upload deb amd64
         id: debarchiveramd64
         uses: actions/upload-artifact@v4
         with:
           name: claude-desktop-deb-amd64
-          path: output/claude-desktop_0.11.3_amd64.deb
-      - name: Create Release
-        id: create_release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v0.11.3
-          name: Release v0.11.3
-          body: |
-            This is the appimage and deb made from this builder.
-          draft: false
-          prerelease: false
-          files: |
-            output/claude-desktop-0.11.3-amd64.AppImage
-            output/claude-desktop_0.11.3_amd64.deb
+          path: output/claude-desktop_*_amd64.deb
+
   build_and_test_arm:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-latest  # ARM runners often not available, using emulation
     steps:
       - name: Checkout repository
         id: checkoutrepo
         uses: actions/checkout@v4
-      - name: mkdir output
-        run: mkdir output
-      - name: builder
-        id: builder
-        uses: joshuacox/claude-desktop-appimage@v0.11.3
-        with: 
-          build-arg: 'appimage'
-      - name: debbuilder
-        id: debbuilder
-        uses: joshuacox/claude-desktop-appimage@v0.11.3
-        with: 
-          build-arg: 'deb'
-      - name: Get the build time
-        run: echo "The time to build was ${{ steps.builder.outputs.time }}"
-      - name: upload appimage arm64
-        id: apparchiverarm64
-        uses: actions/upload-artifact@v4
+      
+      - name: Set up QEMU for ARM64 emulation
+        uses: docker/setup-qemu-action@v2
         with:
-          name: claude-desktop-appimage-arm64
-          path: output/claude-desktop-0.11.3-arm64.AppImage
-      - name: upload deb arm64
+          platforms: arm64
+
+      - name: Create output directory
+        run: mkdir -p output
+
+      - name: Build Debian package (ARM64)
+        id: debbuilder
+        run: |
+          # Use emulated ARM64 build
+          docker build --platform linux/arm64 -t claude-desktop-debian-arm64 .
+          docker run --platform linux/arm64 --rm -v ./output:/home/builder/output claude-desktop-debian-arm64 --build deb --clean yes
+
+      - name: List output files
+        run: ls -la output/
+
+      - name: Upload deb arm64
         id: debarchiverarm64
         uses: actions/upload-artifact@v4
         with:
           name: claude-desktop-deb-arm64
-          path: output/claude-desktop_0.11.3_arm64.deb
-      - name: Create Release
-        id: create_release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v0.11.3
-          name: Release v0.11.3
-          body: |
-            This is the appimage and deb made from this builder.
-          draft: false
-          prerelease: false
-          files: |
-            output/claude-desktop-0.11.3-arm64.AppImage
-            output/claude-desktop_0.11.3_arm64.deb
+          path: output/claude-desktop_*_arm64.deb
