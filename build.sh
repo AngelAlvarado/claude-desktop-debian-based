@@ -1,6 +1,6 @@
 #!/bin/bash
 : "${ARM64_EXPECTED_HASH:=bb7384f57b1c8c98ebd0594436c28a774cf79db37f695ea2a98ee3629374c998}"
-: "${AMD64_EXPECTED_HASH:=2eb18754cabb7573023701d043ec37a3e4680dcc52bb0979ac9cb5862ddf8d39}"
+: "${AMD64_EXPECTED_HASH:=212c958edafdbc6cc2aaaee868341dea1f640bb8ae9b2a37f33f558ee542b2ee}"
 : "${BUILT_IN_DOCKER:=0}"
 #!/bin/bash
 set -euo pipefail
