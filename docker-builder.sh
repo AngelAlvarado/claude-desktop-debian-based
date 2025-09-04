@@ -6,9 +6,16 @@ set -eux
 mkdir -p output
 chmod 777 output
 docker build -t claude-desktop-debian .
+# Use -it flags only when we have a TTY (not in CI)
+if [ -t 0 ]; then
+  DOCKER_FLAGS="-it"
+else
+  DOCKER_FLAGS=""
+fi
+
 docker run \
   --rm \
-  -it \
+  ${DOCKER_FLAGS} \
   -v ./output:/home/builder/output \
   claude-desktop-debian "$@"
 
