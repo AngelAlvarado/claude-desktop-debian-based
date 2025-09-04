@@ -428,7 +428,7 @@ echo "✓ app.asar processed and staged in $APP_STAGING_DIR"
 cd "$PROJECT_ROOT"
 
 echo -e "\033[1;36m--- Call Packaging Script ---\033[0m"
-FINAL_OUTPUT_PATH="" FINAL_DESKTOP_FILE_PATH="" 
+FINAL_OUTPUT_PATH="" 
 if [ "$BUILD_FORMAT" = "deb" ]; then
     echo "📦 Calling Debian packaging script for $ARCHITECTURE..."
     chmod +x scripts/build-deb-package.sh

@@ -10,7 +10,7 @@ docker run \
   --rm \
   -it \
   -v ./output:/home/builder/output \
-  claude-desktop-debian $@
+  claude-desktop-debian "$@"
 
 time2=$(date +%s.%N)
 diff=$(echo "scale=40;${time2} - ${time1}" | bc)
